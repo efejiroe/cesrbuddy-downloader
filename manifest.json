@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "CESR Buddy Downloader",
+  "version": "1.0",
+  "description": "Download FourteenFish assessment pages as PNG with learning outcome codes in the filename.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "downloads",
+    "scripting",
+    "debugger"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CESR Buddy Downloader",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.fourteenfish.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
