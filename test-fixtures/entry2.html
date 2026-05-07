@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <title>Out-of-hour discussion 17/08/2024 | FourteenFish (Test Fixture)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1em 1.5em 3em;
+      color: #1a1a2e;
+      line-height: 1.5;
+    }
+
+    /* Top nav strip — purely decorative, mimics FourteenFish chrome */
+    nav.topnav {
+      display: flex;
+      gap: 2em;
+      padding: 1em 0;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 0.9em;
+      color: #6c757d;
+      margin-bottom: 1em;
+    }
+
+    .test-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      margin-bottom: 1.5em;
+      font-size: 0.85em;
+      color: #664d03;
+    }
+
+    /* h1 — content.js extracts entry type from this */
+    h1 {
+      font-size: 1.7em;
+      font-weight: 400;
+      color: #1a1a2e;
+      margin-bottom: 0.4em;
+    }
+
+    .entry-actions {
+      display: flex;
+      gap: 1.5em;
+      padding: 0.8em 0;
+      margin-bottom: 1.5em;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 0.95em;
+      color: #d63384;
+    }
+
+    /* Section headers (pink, like the real page) */
+    h2.section {
+      color: #d63384;
+      font-size: 1.25em;
+      font-weight: 400;
+      margin: 1.5em 0 0.8em;
+      padding-top: 1em;
+      border-top: 1px solid #e9ecef;
+    }
+
+    /* Field rows — content.js looks for an element whose text is exactly
+       "Title" or "Learning Outcome" and reads the next sibling. */
+    .field {
+      margin-bottom: 1em;
+    }
+    .field .label {
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 0.15em;
+    }
+    .field .value {
+      color: #212529;
+    }
+    .field .value em {
+      font-style: italic;
+      color: #6c757d;
+    }
+
+    /* LO blocks — each LO is its own row pair, just like the real page */
+    .lo-block {
+      padding: 0.8em 0;
+      border-top: 1px solid #f1f3f5;
+    }
+
+    table.history {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5em;
+      font-size: 0.95em;
+    }
+    table.history th, table.history td {
+      text-align: left;
+      padding: 0.5em 0.8em;
+      border-bottom: 1px solid #e9ecef;
+    }
+    table.history th {
+      color: #0d6efd;
+      font-weight: 600;
+    }
+
+    p.scenario {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <span>Dashboard</span>
+    <span>Portfolio</span>
+    <span>Education</span>
+    <span>Consult</span>
+    <span>Communities</span>
+    <span>Surveys</span>
+  </nav>
+
+  <div class="test-banner">
+    <strong>Test fixture.</strong> Static HTML reproducing the structure of a
+    FourteenFish Case-based Discussion entry, used solely to verify the
+    CESR Buddy Downloader extension during Chrome Web Store review. All
+    names, emails and clinical content are synthetic.
+  </div>
+
+  <!-- Entry type — content.js extracts this from the <h1> -->
+  <h1>Case-based Discussion</h1>
+
+  <div class="entry-actions">
+    <span>◊ Portfolio overview</span>
+    <span>📁 Case-based Discussion entries</span>
+    <span>✎ Make copy</span>
+    <span>🔍 All entries</span>
+  </div>
+
+  <!-- Title field — content.js extracts this -->
+  <div class="field">
+    <div class="label">Title</div>
+    <div class="value">Out-of-hour discussion 17/08/2024</div>
+  </div>
+
+  <div class="field">
+    <div class="label">Assessor</div>
+    <div class="value">Dr A. N. Other</div>
+  </div>
+
+  <div class="field">
+    <div class="label">Assessor's Email</div>
+    <div class="value">a.n.other@example.nhs.uk</div>
+  </div>
+
+  <div class="field">
+    <div class="label">Assessor's position</div>
+    <div class="value">Consultant <em>(invited to complete the Case-based Discussion by email)</em></div>
+  </div>
+
+  <h2 class="section">Linked to entry</h2>
+  <div class="field">
+    <div class="value">🏷 Manage what is tagged to this entry</div>
+  </div>
+
+  <!-- Learning Outcome blocks — content.js scans for elements whose text is
+       exactly "Learning Outcome" and extracts (CODE) patterns from the
+       sibling. The real page repeats this block once per LO; we do the same. -->
+  <div class="lo-block">
+    <div class="field">
+      <div class="label">Learning Outcome</div>
+      <div class="value">Clinical history (CA1)</div>
+    </div>
+    <div class="field">
+      <div class="label">Domain</div>
+      <div class="value">Clinical Assessment (CA)</div>
+    </div>
+  </div>
+
+  <div class="lo-block">
+    <div class="field">
+      <div class="label">Learning Outcome</div>
+      <div class="value">General medical (CA11)</div>
+    </div>
+    <div class="field">
+      <div class="label">Domain</div>
+      <div class="value">Clinical Assessment (CA)</div>
+    </div>
+  </div>
+
+  <div class="lo-block">
+    <div class="field">
+      <div class="label">Learning Outcome</div>
+      <div class="value">Neuro examination (CA13)</div>
+    </div>
+    <div class="field">
+      <div class="label">Domain</div>
+      <div class="value">Clinical Assessment (CA)</div>
+    </div>
+  </div>
+
+  <div class="lo-block">
+    <div class="field">
+      <div class="label">Learning Outcome</div>
+      <div class="value">IV (PS4)</div>
+    </div>
+    <div class="field">
+      <div class="label">Domain</div>
+      <div class="value">Practical Skills (PS)</div>
+    </div>
+  </div>
+
+  <h2 class="section">Confirmation</h2>
+  <div class="field">
+    <div class="label">I declare that I have the necessary competencies and skills to sign off this assessment</div>
+    <div class="value">Yes</div>
+  </div>
+
+  <h2 class="section">Trainee</h2>
+  <div class="field">
+    <div class="label">Date of assessment</div>
+    <div class="value">17 August 2024</div>
+  </div>
+  <div class="field">
+    <div class="label">Assessor's Status</div>
+    <div class="value">Consultant</div>
+  </div>
+  <div class="field">
+    <div class="label">Level</div>
+    <div class="value">N/A</div>
+  </div>
+  <div class="field">
+    <div class="label">Clinical Scenario</div>
+    <div class="value">
+      <p class="scenario">33-year-old female presenting with reduced vision in the left eye with associated pain on eye movement. Precipitous reduction in vision in left since last optician check. No history of muscle weakness, numbness, or urinary incontinence. On examination: LE VA HM + grade 1 RAPD, left eye optic disc swelling. Findings and treatment options discussed with patient. Referred for IVMP therapy, MRI and bloods requested, follow-up scheduled.</p>
+    </div>
+  </div>
+  <div class="field">
+    <div class="label">Diagnosis</div>
+    <div class="value">Left optic neuritis</div>
+  </div>
+  <div class="field">
+    <div class="label">Overall difficulty of case</div>
+    <div class="value">Simple</div>
+  </div>
+
+  <h2 class="section">Ophthalmologist Competence Rating</h2>
+  <p style="margin-bottom: 1em; font-weight: 600;">Please rate the competence the ophthalmologist in training has shown in the following areas.</p>
+
+  <div class="field"><div class="label">Medical Record Keeping</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Clinical Assessment</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Investigation and Referrals</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Diagnosis and Treatment</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Follow-up and Future Planning</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Professionalism</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Clinical Judgment</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Recognition and Reflection of Personal Limits</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Involvement and Leadership of the Multi-disciplinary Team</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Awareness of Guidelines, Protocols and Evidence</div><div class="value">Meets expectations</div></div>
+  <div class="field"><div class="label">Evaluation of Published Developments</div><div class="value">Meets expectations</div></div>
+
+  <h2 class="section">Overall Competence</h2>
+  <div class="field">
+    <div class="label">Overall assessment of this case-based discussion</div>
+    <div class="value">Meets expectations</div>
+  </div>
+
+  <h2 class="section">Free-text comments and recommendations</h2>
+  <div class="field">
+    <div class="label">Aspects which were especially good</div>
+    <div class="value">Well presented and discussed.</div>
+  </div>
+  <div class="field">
+    <div class="label">Suggestions for improvement and action points</div>
+    <div class="value">Nil.</div>
+  </div>
+  <div class="field">
+    <div class="label">Agreed action plan</div>
+    <div class="value">Nil.</div>
+  </div>
+
+  <h2 class="section">History for this entry</h2>
+  <table class="history">
+    <thead>
+      <tr><th>Date</th><th>Details</th><th>User</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>17/02/2026 21:14:06</td><td>Added Learning Outcome: Clinical history</td><td>Dr Test User</td></tr>
+      <tr><td>17/02/2026 21:14:06</td><td>Added Learning Outcome: General medical</td><td>Dr Test User</td></tr>
+      <tr><td>17/02/2026 21:14:06</td><td>Added Learning Outcome: Neuro examination</td><td>Dr Test User</td></tr>
+      <tr><td>17/02/2026 21:14:06</td><td>Added Learning Outcome: IV</td><td>Dr Test User</td></tr>
+      <tr><td>12/09/2024 08:09:11</td><td>Locked to further editing as invited assessor</td><td></td></tr>
+      <tr><td>10/09/2024 22:36:45</td><td>Entry created</td><td>Dr Test User</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

@@ -20,6 +20,15 @@ const DEVICE_SCALE   = 1.5;  // → 1920 px physical width
 const PDF_PAPER_W = 11.69;
 const PDF_PAPER_H =  8.27;
 
+// Hosts the extension is allowed to capture from.
+// The github.io entry is a static test fixture for Chrome Web Store review
+// and is not used in normal operation.
+// ⚠ Replace YOUR-GITHUB-USERNAME with your actual GitHub username before publishing.
+const ALLOWED_HOSTS = new Set([
+  "www.fourteenfish.com",
+  "YOUR-GITHUB-USERNAME.github.io",
+]);
+
 // ─── shared helpers ──────────────────────────────────────────────────────────
 
 function dbgSend(tabId, method, params = {}) {
@@ -198,7 +207,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       hostname = new URL(tab.url ?? "").hostname;
     } catch (_) { /* invalid URL falls through to the check below */ }
 
-    if (hostname !== "www.fourteenfish.com") {
+    if (!ALLOWED_HOSTS.has(hostname)) {
       sendResponse({
         status: "error",
         message: "This extension only works on www.fourteenfish.com.",
@@ -206,14 +215,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       return;
     }
 
-    const pathname = new URL(tab.url ?? "").pathname;
-    if (!pathname.startsWith("/trainer/view/")) {
-      sendResponse({
-        status: "error",
-        message:
-          "This doesn't look like an assessment entry. Navigate to a FourteenFish assessment entry (CBD, DOPS, Mini-CEX, etc.) and try again.",
-      });
-      return;
+    if (hostname === "www.fourteenfish.com") {
+      const pathname = new URL(tab.url ?? "").pathname;
+      if (!pathname.startsWith("/trainer/view/")) {
+        sendResponse({
+          status: "error",
+          message:
+            "This doesn't look like an assessment entry. Navigate to a FourteenFish assessment entry (CBD, DOPS, Mini-CEX, etc.) and try again.",
+        });
+        return;
+      }
     }
 
     const sendProgress = (progress) => {

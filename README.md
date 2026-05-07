@@ -90,6 +90,10 @@ seconds a capture takes, then is discarded when the popup closes.
 
 ## Installation (development / unpacked)
 
+> ⚠ **Before publishing to the Chrome Web Store:** replace every occurrence of
+> `YOUR-GITHUB-USERNAME` in `manifest.json` and `background.js` with your
+> actual GitHub username.
+
 1. Download or clone this folder.
 2. Visit `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top-right toggle).
@@ -114,9 +118,22 @@ popup.js           Popup button handlers and status reporting
 content.js         Reads title / entry type / LO codes from the page
 background.js      Service worker — handles capture and download
 icons/             Toolbar and store-listing icons (16/32/48/128 px)
+test-fixtures/     Static HTML pages for Chrome Web Store review (see below)
 README.md          This file
 PRIVACY.md         Standalone privacy policy (same content as the section above)
 ```
+
+## Test fixtures
+
+The `test-fixtures/` directory contains static HTML files that reproduce the
+FourteenFish assessment page DOM structure. They exist solely for Chrome Web
+Store reviewers, who cannot access FourteenFish (a paid UK medical platform),
+and for local development without a live account.
+
+The fixtures contain only **synthetic data** — no real patient, assessor, or
+user information. They are served via GitHub Pages and are listed in
+`manifest.json` as an allowed host so the extension's content script runs on
+them during review.
 
 ## Author
 

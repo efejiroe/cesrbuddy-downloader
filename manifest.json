@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "CESR Buddy Downloader",
-  "version": "1.0",
-  "description": "Download FourteenFish assessment pages as PNG with learning outcome codes in the filename.",
+  "version": "1.0.0",
+  "description": "Save FourteenFish assessments as searchable PDFs or PNGs, named with Learning Outcome codes for CESR evidence.",
   "permissions": [
     "activeTab",
     "tabs",
@@ -31,7 +31,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.fourteenfish.com/*"],
+      "matches": [
+        "https://www.fourteenfish.com/*",
+        "https://YOUR-GITHUB-USERNAME.github.io/cesrbuddy-downloader/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }

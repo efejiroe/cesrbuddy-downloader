@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bilateral Optic Atrophy | FourteenFish (Test Fixture)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 0 1.5em;
+      color: #1a1a2e;
+    }
+    .notice {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 0.75em 1em;
+      border-radius: 6px;
+      margin-bottom: 1.5em;
+      font-size: 0.9em;
+    }
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+      border-bottom: 2px solid #d63384;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 1em;
+      padding: 0.75em 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .label { font-weight: 600; color: #495057; }
+    .value { color: #212529; }
+    .lo-list { margin: 0; padding-left: 1.2em; }
+    .lo-list li { margin-bottom: 0.25em; }
+  </style>
+</head>
+<body>
+  <div class="notice">
+    <strong>Test fixture.</strong> Static HTML reproducing the structure of
+    a FourteenFish Learning Outcome assessment page, used solely to verify
+    the CESR Buddy Downloader extension during Chrome Web Store review.
+    No real patient or trainee data.
+  </div>
+
+  <!-- Entry type — extracted by content.js from the <h1> -->
+  <h1>Case-based Discussion</h1>
+
+  <!-- Title row — content.js looks for an element whose text is exactly
+       "Title" and reads the next sibling. -->
+  <div class="row">
+    <div class="label">Title</div>
+    <div class="value">Bilateral Optic Atrophy</div>
+  </div>
+
+  <div class="row">
+    <div class="label">Date</div>
+    <div class="value">14 March 2026</div>
+  </div>
+
+  <div class="row">
+    <div class="label">Assessor</div>
+    <div class="value">Dr A. N. Other (Consultant Ophthalmologist)</div>
+  </div>
+
+  <!-- Learning Outcome row — content.js looks for an element whose text is
+       exactly "Learning Outcome" and reads codes matching (LETTERS+DIGITS)
+       from the next sibling. -->
+  <div class="row">
+    <div class="label">Learning Outcome</div>
+    <div class="value">
+      <ul class="lo-list">
+        <li>Clinical history (CA1)</li>
+        <li>Examination and procedural skills (CC2)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Reflection</div>
+    <div class="value">
+      <p>This case prompted reflection on the differential diagnosis of
+      bilateral optic atrophy in a young adult, including hereditary,
+      nutritional, toxic, and demyelinating causes. Key learning points
+      included the importance of OCT in quantifying retinal nerve fibre
+      layer thinning and the role of mitochondrial DNA testing where
+      Leber's hereditary optic neuropathy is suspected.</p>
+
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+      eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+      ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+      aliquip ex ea commodo consequat.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Action plan</div>
+    <div class="value">
+      <p>Review NICE guidance on management of suspected optic neuropathy.
+      Discuss with neurology colleagues regarding shared-care pathway.
+      Add this case to the practice teaching library.</p>
+    </div>
+  </div>
+</body>
+</html>
