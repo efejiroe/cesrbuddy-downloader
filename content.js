@@ -7,10 +7,7 @@ function extractPageData() {
     title: "",
     entryType: "",
     learningOutcomeCodes: [],
-    isLearningOutcomePage: false,
   };
-
-  let hasLearningOutcomeLabel = false;
 
   // --- Entry type: the <h1> at the top of the page (e.g. "Case-based Discussion") ---
   const h1 = document.querySelector("h1");
@@ -71,7 +68,6 @@ function extractPageData() {
       : "";
 
     if (text === "Learning Outcome") {
-      hasLearningOutcomeLabel = true;
       // Try next sibling first, then parent's next sibling
       const candidates = [
         el.nextElementSibling,
@@ -93,9 +89,6 @@ function extractPageData() {
       }
     }
   }
-
-  data.isLearningOutcomePage =
-    hasLearningOutcomeLabel && data.learningOutcomeCodes.length > 0;
 
   return data;
 }

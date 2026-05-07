@@ -63,10 +63,13 @@ function slugify(text) {
 }
 
 function buildFilename(pageData, ext) {
-  const codes = pageData.learningOutcomeCodes.join("_") || "Unknown_LO";
-  const title  = slugify(pageData.title)     || "Untitled";
-  const type   = slugify(pageData.entryType) || "Entry";
-  return `${codes}_${title}_${type}.${ext}`;
+  const title = slugify(pageData.title)     || "Untitled";
+  const type  = slugify(pageData.entryType) || "Entry";
+  if (pageData.learningOutcomeCodes.length > 0) {
+    const codes = pageData.learningOutcomeCodes.join("_");
+    return `${codes}_${title}_${type}.${ext}`;
+  }
+  return `${title}_${type}.${ext}`;
 }
 
 async function ensureContentScript(tabId) {
@@ -203,6 +206,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       return;
     }
 
+    const pathname = new URL(tab.url ?? "").pathname;
+    if (!pathname.startsWith("/trainer/view/")) {
+      sendResponse({
+        status: "error",
+        message:
+          "This doesn't look like an assessment entry. Navigate to a FourteenFish assessment entry (CBD, DOPS, Mini-CEX, etc.) and try again.",
+      });
+      return;
+    }
+
     const sendProgress = (progress) => {
       chrome.runtime.sendMessage({ action: "captureProgress", format, ...progress })
         .catch(() => {});
@@ -211,15 +224,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     try {
       await ensureContentScript(tab.id);
       const pageData = await getPageData(tab.id);
-
-      if (!pageData.isLearningOutcomePage) {
-        sendResponse({
-          status: "error",
-          message:
-            "This doesn't look like a Learning Outcome page. Open an assessment entry that lists Learning Outcome codes and try again.",
-        });
-        return;
-      }
 
       if (format === "pdf") {
         await captureAsPdf(tab.id, pageData, sendProgress);
