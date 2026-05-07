@@ -23,10 +23,10 @@ const PDF_PAPER_H =  8.27;
 // Hosts the extension is allowed to capture from.
 // The github.io entry is a static test fixture for Chrome Web Store review
 // and is not used in normal operation.
-// ⚠ Replace YOUR-GITHUB-USERNAME with your actual GitHub username before publishing.
+// ⚠ Replace efejiroe with your actual GitHub username before publishing.
 const ALLOWED_HOSTS = new Set([
   "www.fourteenfish.com",
-  "YOUR-GITHUB-USERNAME.github.io",
+  "efejiroe.github.io",
 ]);
 
 // ─── shared helpers ──────────────────────────────────────────────────────────

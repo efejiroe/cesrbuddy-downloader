@@ -33,7 +33,7 @@
     {
       "matches": [
         "https://www.fourteenfish.com/*",
-        "https://YOUR-GITHUB-USERNAME.github.io/cesrbuddy-downloader/*"
+        "https://efejiroe.github.io/cesrbuddy-downloader/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

@@ -91,7 +91,7 @@ seconds a capture takes, then is discarded when the popup closes.
 ## Installation (development / unpacked)
 
 > ⚠ **Before publishing to the Chrome Web Store:** replace every occurrence of
-> `YOUR-GITHUB-USERNAME` in `manifest.json` and `background.js` with your
+> `efejiroe` in `manifest.json` and `background.js` with your
 > actual GitHub username.
 
 1. Download or clone this folder.
