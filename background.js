@@ -154,13 +154,16 @@ function uint8ToBase64(bytes) {
 }
 
 function buildImagePdf(jpegBytes, imgW, imgH) {
-  // Scale image to fill A4 landscape (841.89 × 595.28 pt), centred
-  const PW = 841.89, PH = 595.28;
-  const sc = Math.min(PW / imgW, PH / imgH);
-  const dW = (imgW * sc).toFixed(2);
-  const dH = (imgH * sc).toFixed(2);
-  const dX = ((PW - imgW * sc) / 2).toFixed(2);
-  const dY = ((PH - imgH * sc) / 2).toFixed(2);
+  // Page width = A4 portrait width (595.28 pt); height scales proportionally.
+  // This keeps the image full-width and readable on a single page regardless
+  // of how tall the captured page is.
+  const PW = 595.28;
+  const sc = PW / imgW;
+  const PH = (imgH * sc).toFixed(2);
+  const dW = PW.toFixed(2);
+  const dH = PH;
+  const dX = "0.00";
+  const dY = "0.00";
 
   const stream4 = `q\n${dW} 0 0 ${dH} ${dX} ${dY} cm\n/Im1 Do\nQ\n`;
   const enc = new TextEncoder();
@@ -175,7 +178,7 @@ function buildImagePdf(jpegBytes, imgW, imgH) {
   ws("%PDF-1.4\n");
   mk(1); ws("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
   mk(2); ws("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
-  mk(3); ws(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`);
+  mk(3); ws(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`);
   mk(4); ws(`4 0 obj\n<< /Length ${enc.encode(stream4).length} >>\nstream\n`);
          ws(stream4); ws("endstream\nendobj\n");
   mk(5); ws(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
