@@ -7,18 +7,16 @@
  *          Uses Page.captureScreenshot with a 1280-px logical viewport at
  *          1.5× device scale (crisp 1920-px-wide image).
  *
- *   PDF  — searchable / copy-pasteable PDF.
- *          Uses Page.printToPDF (Chrome's native print engine) so every
- *          character is a real text glyph, not a rasterised pixel.
- *          Rendered at A4 landscape with backgrounds preserved.
+ *   PDF  — single-page image PDF.
+ *          Takes the same full-page screenshot as the PNG path, re-encodes it
+ *          as JPEG, then wraps it in a minimal hand-built PDF sized to A4
+ *          landscape.  One page, guaranteed — and the full viewport width
+ *          means wide multi-column layouts (assessor column etc.) are never
+ *          clipped.
  */
 
-const VIEWPORT_WIDTH = 1280; // logical CSS px for PNG capture
+const VIEWPORT_WIDTH = 1280; // logical CSS px
 const DEVICE_SCALE   = 1.5;  // → 1920 px physical width
-
-// A4 landscape in inches (Chrome DevTools Protocol unit)
-const PDF_PAPER_W = 11.69;
-const PDF_PAPER_H =  8.27;
 
 // Hosts the extension is allowed to capture from.
 // The github.io entry is a static test fixture for Chrome Web Store review
@@ -141,48 +139,106 @@ async function captureAsPng(tabId, pageData, sendProgress) {
 
 // ─── PDF capture ─────────────────────────────────────────────────────────────
 //
-// Page.printToPDF uses Chrome's native print engine.  Every word is a real
-// text glyph — the resulting PDF is fully searchable and copy-pasteable.
-//
-// Strategy:
-//   1. Override viewport to 1122 px (A4 landscape at 96 DPI → exactly 11.69 in)
-//      so the page layout reflowed for screen CSS maps 1:1 to the paper width.
-//   2. Call printToPDF with matching paper dimensions, no extra scaling.
-//   3. Restore metrics and detach.
+// Takes a full-page screenshot (identical to the PNG path), re-encodes it as
+// JPEG, then hand-builds a minimal single-page PDF around the image bytes.
+// This sidesteps Chrome's print engine entirely — the result is always exactly
+// one page and uses the same 1920-px-wide viewport as the PNG capture, so
+// wide layouts (assessor column etc.) are never clipped.
 
-const PDF_VIEWPORT_W = Math.round(PDF_PAPER_W * 96); // 1122 px
+function uint8ToBase64(bytes) {
+  let s = "";
+  const SZ = 0x8000;
+  for (let i = 0; i < bytes.length; i += SZ)
+    s += String.fromCharCode(...bytes.subarray(i, i + SZ));
+  return btoa(s);
+}
+
+function buildImagePdf(jpegBytes, imgW, imgH) {
+  // Page width = A4 portrait width (595.28 pt); height scales proportionally.
+  // This keeps the image full-width and readable on a single page regardless
+  // of how tall the captured page is.
+  const PW = 595.28;
+  const sc = PW / imgW;
+  const PH = (imgH * sc).toFixed(2);
+  const dW = PW.toFixed(2);
+  const dH = PH;
+  const dX = "0.00";
+  const dY = "0.00";
+
+  const stream4 = `q\n${dW} 0 0 ${dH} ${dX} ${dY} cm\n/Im1 Do\nQ\n`;
+  const enc = new TextEncoder();
+  const chunks = [];
+  let pos = 0;
+  const off = [];
+
+  const ws = (s) => { const b = enc.encode(s); chunks.push(b); pos += b.length; };
+  const wb = (b) => {                           chunks.push(b); pos += b.length; };
+  const mk = (n) => { off[n] = pos; };
+
+  ws("%PDF-1.4\n");
+  mk(1); ws("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  mk(2); ws("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
+  mk(3); ws(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`);
+  mk(4); ws(`4 0 obj\n<< /Length ${enc.encode(stream4).length} >>\nstream\n`);
+         ws(stream4); ws("endstream\nendobj\n");
+  mk(5); ws(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
+         wb(jpegBytes); ws("\nendstream\nendobj\n");
+
+  const xrefPos = pos;
+  ws("xref\n0 6\n0000000000 65535 f \n");
+  for (let i = 1; i <= 5; i++) ws(`${String(off[i]).padStart(10, "0")} 00000 n \n`);
+  ws(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`);
+
+  const out = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
+  let at = 0;
+  for (const c of chunks) { out.set(c, at); at += c.length; }
+  return out;
+}
 
 async function captureAsPdf(tabId, pageData, sendProgress) {
   const filename = buildFilename(pageData, "pdf");
-  sendProgress({ status: "capturing", message: `Generating PDF…\n${filename}` });
+  sendProgress({ status: "capturing", message: `Capturing page…\n${filename}` });
 
   await dbgAttach(tabId);
   try {
-    // Reflow page to match the PDF paper width
+    // Same capture path as PNG
     await dbgSend(tabId, "Emulation.setDeviceMetricsOverride", {
-      width: PDF_VIEWPORT_W, height: 900,
-      deviceScaleFactor: 1, mobile: false,
+      width: VIEWPORT_WIDTH, height: 900,
+      deviceScaleFactor: DEVICE_SCALE, mobile: false,
     });
-    await new Promise((r) => setTimeout(r, 700)); // wait for reflow + fonts
+    await new Promise((r) => setTimeout(r, 600));
 
-    const { data } = await dbgSend(tabId, "Page.printToPDF", {
-      landscape:            true,
-      printBackground:      true,   // preserve brand colours / backgrounds
-      scale:                1,      // 1:1 — viewport already matches paper
-      paperWidth:           PDF_PAPER_W,
-      paperHeight:          PDF_PAPER_H,
-      marginTop:            0.39,   // ~1 cm margins all round
-      marginBottom:         0.39,
-      marginLeft:           0.39,
-      marginRight:          0.39,
-      displayHeaderFooter:  false,  // clean output — no "Page 1 of N" clutter
-      transferMode:         "ReturnAsBase64",
+    const metrics = await dbgSend(tabId, "Page.getLayoutMetrics");
+    const w = Math.ceil(metrics.cssContentSize.width);
+    const h = Math.ceil(metrics.cssContentSize.height);
+
+    await dbgSend(tabId, "Emulation.setDeviceMetricsOverride", {
+      width: w, height: h,
+      deviceScaleFactor: DEVICE_SCALE, mobile: false,
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    const { data: pngB64 } = await dbgSend(tabId, "Page.captureScreenshot", {
+      format: "png",
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: w, height: h, scale: 1 },
     });
 
     await dbgSend(tabId, "Emulation.clearDeviceMetricsOverride");
 
+    // Re-encode as JPEG and wrap in a hand-built single-page PDF
+    sendProgress({ status: "capturing", message: "Building PDF…" });
+    const pngBytes  = Uint8Array.from(atob(pngB64), (c) => c.charCodeAt(0));
+    const img       = await createImageBitmap(new Blob([pngBytes], { type: "image/png" }));
+    const canvas    = new OffscreenCanvas(img.width, img.height);
+    canvas.getContext("2d").drawImage(img, 0, 0);
+    const jpegBytes = new Uint8Array(
+      await (await canvas.convertToBlob({ type: "image/jpeg", quality: 0.92 })).arrayBuffer()
+    );
+    const pdfBytes = buildImagePdf(jpegBytes, img.width, img.height);
+
     sendProgress({ status: "downloading", message: "Saving PDF…" });
-    await download("data:application/pdf;base64," + data, filename);
+    await download("data:application/pdf;base64," + uint8ToBase64(pdfBytes), filename);
     sendProgress({ status: "done", message: `Saved:\n${filename}`, filename });
   } finally {
     await dbgDetach(tabId);
