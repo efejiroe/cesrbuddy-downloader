@@ -14,10 +14,9 @@ folder is self-organising.
 
 - **One-click PNG capture** — full-page, pixel-perfect screenshot at
   1920 px wide (1280 px logical viewport × 1.5 device scale).
-- **One-click searchable PDF** — uses Chrome's native print engine, so every
-  word in the PDF is real selectable / copy-pasteable text, not a flat image.
-  The output is optimally scaled to fit all essential information — including
-  the assessor's full name — on a single page.
+- **One-click PDF** — captures the full page as a single-page image PDF,
+  identical in coverage to the PNG (including the assessor's full name).
+  All essential information is guaranteed to fit on one page.
 - **Smart filenames** — automatically pulls the Learning Outcome codes
   (e.g. `CA1`, `CC2`), the entry title, and the entry type from the page
   and joins them into the saved filename.
