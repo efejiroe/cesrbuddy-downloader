@@ -1,12 +1,18 @@
 # CESR Buddy Downloader
 
 A Chrome extension that saves a FourteenFish Learning Outcome (LO) assessment
-page as a **PNG screenshot** or a **searchable PDF**, with the LO codes,
-entry title, and entry type baked into the filename — so your CESR evidence
-folder is self-organising.
+page as a **PNG screenshot** or a **PDF**, with the LO codes, entry title, and
+entry type baked into the filename — so your CESR evidence folder stays
+organised and every file is immediately identifiable without opening it.
 
 > Example output filename:
-> `CA1_CC2_Bilateral_Optic_Atrophy_Casebased_Discussion.png`
+> `CA1_CC2_Bilateral_Optic_Atrophy_Casebased_Discussion.pdf`
+
+The filename tells you the competency codes (`CA1`, `CC2`), the case
+(`Bilateral_Optic_Atrophy`), and the assessment type
+(`Casebased_Discussion`) at a glance — making it straightforward to sort,
+filter, and compile evidence by Learning Outcome when building your CESR
+portfolio.
 
 ---
 
@@ -17,9 +23,11 @@ folder is self-organising.
 - **One-click PDF** — captures the full page as a single-page image PDF,
   identical in coverage to the PNG (including the assessor's full name).
   All essential information is guaranteed to fit on one page.
-- **Smart filenames** — automatically pulls the Learning Outcome codes
-  (e.g. `CA1`, `CC2`), the entry title, and the entry type from the page
-  and joins them into the saved filename.
+- **Content-rich filenames** — automatically pulls the Learning Outcome codes
+  (e.g. `CA1`, `CC2`), the entry title, and the entry type from the page and
+  encodes them into the filename. Every saved file is self-describing: you can
+  identify the competency, case, and assessment type without opening it, making
+  bulk sorting and CESR compilation straightforward.
 - **Strictly scoped** — refuses to run anywhere except a Learning Outcome
   page on `www.fourteenfish.com`, so it can't accidentally screenshot
   unrelated tabs.
@@ -31,7 +39,7 @@ folder is self-organising.
 1. You open a FourteenFish assessment entry (CbD, Mini-CEX, MSF, etc.) that
    shows a *Learning Outcome* section with codes.
 2. You click the extension icon and choose **Download PNG** or
-   **Searchable PDF**.
+   **Download PDF**.
 3. The extension reads three small pieces of text from the visible page:
    - the entry type (the `<h1>` at the top of the page),
    - the value of the *Title* row,
@@ -51,7 +59,7 @@ why — nothing is read, attached, or saved.
 share any of your data. Everything happens locally in your browser.**
 
 ### What the extension reads
-When — and only when — you click *Download PNG* or *Searchable PDF* on a
+When — and only when — you click *Download PNG* or *Download PDF* on a
 qualifying FourteenFish LO page, the extension reads:
 
 - The active tab's URL (to confirm it's `www.fourteenfish.com`).
@@ -80,7 +88,7 @@ qualifying FourteenFish LO page, the extension reads:
 | `tabs`         | Check the active tab's URL before doing anything, so the extension can refuse to run on non-FourteenFish sites. |
 | `downloads`    | Save the PNG / PDF file to your Downloads folder. |
 | `scripting`    | Inject the small content script that extracts the title and LO codes. |
-| `debugger`     | Use Chrome's DevTools Protocol to capture a full-page screenshot (`Page.captureScreenshot`) or a searchable PDF (`Page.printToPDF`). This is the **only** reliable way to capture beyond the visible viewport with crisp text — no other API exposes it. The debugger session is opened, used, and detached within a single capture, and is never used to inspect or modify the page beyond rendering it. |
+| `debugger`     | Use Chrome's DevTools Protocol to capture a full-page screenshot (`Page.captureScreenshot`) for both PNG and PDF outputs. This is the **only** reliable way to capture beyond the visible viewport — no other API exposes it. The debugger session is opened, used, and detached within a single capture, and is never used to inspect or modify the page beyond rendering it. |
 | Host access to `https://www.fourteenfish.com/*` | Restrict where the content script may run. The extension cannot read or run on any other site. |
 
 ### Data retention
@@ -105,8 +113,8 @@ seconds a capture takes, then is discarded when the popup closes.
 
 1. Open any FourteenFish assessment entry that lists Learning Outcome codes.
 2. Click the **CESR Buddy Downloader** icon in the toolbar.
-3. Click **Download PNG** for a screenshot, or **Searchable PDF** for a
-   text-searchable PDF.
+3. Click **Download PNG** for a screenshot, or **Download PDF** for a
+   single-page PDF.
 4. Find the file in your Downloads folder, named with the LO codes, title,
    and entry type.
 
