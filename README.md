@@ -1,18 +1,28 @@
 # CESR Buddy Downloader
 
-A Chrome extension that saves a FourteenFish Learning Outcome (LO) assessment
-page as a **PNG screenshot** or a **PDF**, with the LO codes, entry title, and
-entry type baked into the filename — so your CESR evidence folder stays
-organised and every file is immediately identifiable without opening it.
+A Chrome extension that saves a FourteenFish assessment page as a
+**PNG screenshot** or a **searchable PDF**, named automatically from the
+case title and assessment type — so every file is immediately identifiable
+and your CESR evidence folder stays organised without any manual renaming.
 
-> Example output filename:
-> `CA1_CC2_Bilateral_Optic_Atrophy_Casebased_Discussion.pdf`
+> Example output filenames:
+> `Non-contact biometry_DOPS.pdf`
+> `Clinic discussion of patient_CbD.pdf`
 
-The filename tells you the competency codes (`CA1`, `CC2`), the case
-(`Bilateral_Optic_Atrophy`), and the assessment type
-(`Casebased_Discussion`) at a glance — making it straightforward to sort,
-filter, and compile evidence by Learning Outcome when building your CESR
-portfolio.
+The filename encodes the case title and a standard abbreviation for the
+assessment type, making it straightforward to sort, filter, and compile
+evidence by type when building your CESR portfolio.
+
+| Assessment type | Abbreviation used |
+| --- | --- |
+| Direct Observation of Procedural Skills | `DOPS` |
+| Case-based Discussion | `CbD` |
+| Entrustable Professional Activity 1, 2, … | `EPA1`, `EPA2`, … |
+| Clinical Rating Scale | `CRS` |
+| Objective Structured Assessment of Technical Skills | `OSATS` |
+| Mini Clinical Evaluation Exercise | `Mini-CEX` |
+| Multi-Source Feedback | `MSF` |
+| Any other type | full type name |
 
 ---
 
@@ -24,11 +34,10 @@ portfolio.
   identical in coverage to the PNG (including the assessor's full name), with
   an invisible text layer drawn from the live DOM so every word is findable
   with Ctrl+F and selectable without any OCR.
-- **Content-rich filenames** — automatically pulls the Learning Outcome codes
-  (e.g. `CA1`, `CC2`), the entry title, and the entry type from the page and
-  encodes them into the filename. Every saved file is self-describing: you can
-  identify the competency, case, and assessment type without opening it, making
-  bulk sorting and CESR compilation straightforward.
+- **Self-describing filenames** — automatically pulls the case title and
+  assessment type from the page and formats them as `Title_TYPE.ext`.
+  Every saved file is identifiable at a glance — no need to open it —
+  making bulk sorting and CESR compilation straightforward.
 - **Strictly scoped** — refuses to run anywhere except a Learning Outcome
   page on `www.fourteenfish.com`, so it can't accidentally screenshot
   unrelated tabs.
