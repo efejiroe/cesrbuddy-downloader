@@ -20,9 +20,10 @@ portfolio.
 
 - **One-click PNG capture** — full-page, pixel-perfect screenshot at
   1920 px wide (1280 px logical viewport × 1.5 device scale).
-- **One-click PDF** — captures the full page as a single-page image PDF,
-  identical in coverage to the PNG (including the assessor's full name).
-  All essential information is guaranteed to fit on one page.
+- **One-click searchable PDF** — captures the full page as a single-page PDF
+  identical in coverage to the PNG (including the assessor's full name), with
+  an invisible text layer drawn from the live DOM so every word is findable
+  with Ctrl+F and selectable without any OCR.
 - **Content-rich filenames** — automatically pulls the Learning Outcome codes
   (e.g. `CA1`, `CC2`), the entry title, and the entry type from the page and
   encodes them into the filename. Every saved file is self-describing: you can
@@ -39,7 +40,7 @@ portfolio.
 1. You open a FourteenFish assessment entry (CbD, Mini-CEX, MSF, etc.) that
    shows a *Learning Outcome* section with codes.
 2. You click the extension icon and choose **Download PNG** or
-   **Download PDF**.
+   **Searchable PDF**.
 3. The extension reads three small pieces of text from the visible page:
    - the entry type (the `<h1>` at the top of the page),
    - the value of the *Title* row,
@@ -113,8 +114,8 @@ seconds a capture takes, then is discarded when the popup closes.
 
 1. Open any FourteenFish assessment entry that lists Learning Outcome codes.
 2. Click the **CESR Buddy Downloader** icon in the toolbar.
-3. Click **Download PNG** for a screenshot, or **Download PDF** for a
-   single-page PDF.
+3. Click **Download PNG** for a screenshot, or **Searchable PDF** for a
+   single-page searchable PDF.
 4. Find the file in your Downloads folder, named with the LO codes, title,
    and entry type.
 

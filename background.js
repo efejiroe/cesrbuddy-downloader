@@ -140,10 +140,10 @@ async function captureAsPng(tabId, pageData, sendProgress) {
 // ─── PDF capture ─────────────────────────────────────────────────────────────
 //
 // Takes a full-page screenshot (identical to the PNG path), re-encodes it as
-// JPEG, then hand-builds a minimal single-page PDF around the image bytes.
-// This sidesteps Chrome's print engine entirely — the result is always exactly
-// one page and uses the same 1920-px-wide viewport as the PNG capture, so
-// wide layouts (assessor column etc.) are never clipped.
+// JPEG, then hand-builds a single-page PDF with two layers:
+//   1. The JPEG image (visible).
+//   2. An invisible positioned text layer from the live DOM, so Ctrl+F and
+//      text selection work at the correct positions without any OCR.
 
 function uint8ToBase64(bytes) {
   let s = "";
@@ -153,46 +153,95 @@ function uint8ToBase64(bytes) {
   return btoa(s);
 }
 
-function buildImagePdf(jpegBytes, imgW, imgH) {
-  // Page width = A4 portrait width (595.28 pt); height scales proportionally.
-  // This keeps the image full-width and readable on a single page regardless
-  // of how tall the captured page is.
-  const PW = 595.28;
-  const sc = PW / imgW;
-  const PH = (imgH * sc).toFixed(2);
-  const dW = PW.toFixed(2);
-  const dH = PH;
-  const dX = "0.00";
-  const dY = "0.00";
+// Encode text as a PDF literal string, replacing non-ASCII with spaces.
+function pdfStr(text) {
+  let r = "(";
+  for (const ch of text) {
+    const c = ch.charCodeAt(0);
+    if (ch === "(")       r += "\\(";
+    else if (ch === ")")  r += "\\)";
+    else if (ch === "\\") r += "\\\\";
+    else if (c >= 32 && c <= 126) r += ch;
+    else r += " ";
+  }
+  return r + ")";
+}
 
-  const stream4 = `q\n${dW} 0 0 ${dH} ${dX} ${dY} cm\n/Im1 Do\nQ\n`;
-  const enc = new TextEncoder();
+// Build the invisible text layer stream from DOM-extracted text items.
+// cssW is the CSS layout width; PW/PH_num are the PDF page dimensions in pt.
+function buildTextStream(items, cssW, PW, PH_num) {
+  if (!items.length || cssW <= 0) return "";
+  const tsc = PW / cssW; // CSS px → PDF pt
+  const lines = ["BT", "3 Tr"]; // rendering mode 3 = invisible
+  for (const { text, x, y, h, size } of items) {
+    const px = (x * tsc).toFixed(2);
+    // PDF y=0 is bottom; text Tm positions the baseline (~80% down from top of line)
+    const py = (PH_num - (y + h * 0.8) * tsc).toFixed(2);
+    const fs = Math.max((size * tsc).toFixed(2), 1);
+    lines.push(`/F1 ${fs} Tf 1 0 0 1 ${px} ${py} Tm ${pdfStr(text)} Tj`);
+  }
+  lines.push("ET");
+  return lines.join("\n") + "\n";
+}
+
+function buildImagePdf(jpegBytes, imgW, imgH, textItems, cssW) {
+  // Page width = A4 portrait width (595.28 pt); height scales proportionally.
+  const PW     = 595.28;
+  const sc     = PW / imgW;
+  const PH_num = imgH * sc;
+  const PH     = PH_num.toFixed(2);
+
+  const stream4 = `q\n${PW.toFixed(2)} 0 0 ${PH} 0.00 0.00 cm\n/Im1 Do\nQ\n`;
+  const stream7 = buildTextStream(textItems || [], cssW || 0, PW, PH_num);
+  const hasText = stream7.length > 0;
+
+  const enc    = new TextEncoder();
   const chunks = [];
-  let pos = 0;
-  const off = [];
+  let   pos    = 0;
+  const off    = [];
 
   const ws = (s) => { const b = enc.encode(s); chunks.push(b); pos += b.length; };
   const wb = (b) => {                           chunks.push(b); pos += b.length; };
   const mk = (n) => { off[n] = pos; };
 
+  const resources = hasText
+    ? `/XObject << /Im1 5 0 R >> /Font << /F1 6 0 R >>`
+    : `/XObject << /Im1 5 0 R >>`;
+  const contents = hasText ? `[4 0 R 7 0 R]` : `4 0 R`;
+  const objCount = hasText ? 7 : 5;
+
   ws("%PDF-1.4\n");
-  mk(1); ws("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
-  mk(2); ws("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
-  mk(3); ws(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`);
+  mk(1); ws(`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`);
+  mk(2); ws(`2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`);
+  mk(3); ws(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH}] /Contents ${contents} /Resources << ${resources} >> >>\nendobj\n`);
   mk(4); ws(`4 0 obj\n<< /Length ${enc.encode(stream4).length} >>\nstream\n`);
-         ws(stream4); ws("endstream\nendobj\n");
+         ws(stream4); ws(`endstream\nendobj\n`);
   mk(5); ws(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
-         wb(jpegBytes); ws("\nendstream\nendobj\n");
+         wb(jpegBytes); ws(`\nendstream\nendobj\n`);
+  if (hasText) {
+    mk(6); ws(`6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n`);
+    mk(7); ws(`7 0 obj\n<< /Length ${enc.encode(stream7).length} >>\nstream\n`);
+           ws(stream7); ws(`endstream\nendobj\n`);
+  }
 
   const xrefPos = pos;
-  ws("xref\n0 6\n0000000000 65535 f \n");
-  for (let i = 1; i <= 5; i++) ws(`${String(off[i]).padStart(10, "0")} 00000 n \n`);
-  ws(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`);
+  ws(`xref\n0 ${objCount + 1}\n0000000000 65535 f \n`);
+  for (let i = 1; i <= objCount; i++) ws(`${String(off[i]).padStart(10, "0")} 00000 n \n`);
+  ws(`trailer\n<< /Size ${objCount + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`);
 
   const out = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
   let at = 0;
   for (const c of chunks) { out.set(c, at); at += c.length; }
   return out;
+}
+
+function getTextLayer(tabId) {
+  return new Promise((resolve) => {
+    chrome.tabs.sendMessage(tabId, { action: "getTextLayer" }, (response) => {
+      // Non-fatal — if it fails, produce a plain image PDF with no text layer
+      resolve(Array.isArray(response) ? response : []);
+    });
+  });
 }
 
 async function captureAsPdf(tabId, pageData, sendProgress) {
@@ -201,7 +250,6 @@ async function captureAsPdf(tabId, pageData, sendProgress) {
 
   await dbgAttach(tabId);
   try {
-    // Same capture path as PNG
     await dbgSend(tabId, "Emulation.setDeviceMetricsOverride", {
       width: VIEWPORT_WIDTH, height: 900,
       deviceScaleFactor: DEVICE_SCALE, mobile: false,
@@ -218,6 +266,9 @@ async function captureAsPdf(tabId, pageData, sendProgress) {
     });
     await new Promise((r) => setTimeout(r, 400));
 
+    // Extract text positions while the viewport matches the screenshot layout
+    const textItems = await getTextLayer(tabId);
+
     const { data: pngB64 } = await dbgSend(tabId, "Page.captureScreenshot", {
       format: "png",
       captureBeyondViewport: true,
@@ -226,7 +277,6 @@ async function captureAsPdf(tabId, pageData, sendProgress) {
 
     await dbgSend(tabId, "Emulation.clearDeviceMetricsOverride");
 
-    // Re-encode as JPEG and wrap in a hand-built single-page PDF
     sendProgress({ status: "capturing", message: "Building PDF…" });
     const pngBytes  = Uint8Array.from(atob(pngB64), (c) => c.charCodeAt(0));
     const img       = await createImageBitmap(new Blob([pngBytes], { type: "image/png" }));
@@ -235,7 +285,7 @@ async function captureAsPdf(tabId, pageData, sendProgress) {
     const jpegBytes = new Uint8Array(
       await (await canvas.convertToBlob({ type: "image/jpeg", quality: 0.92 })).arrayBuffer()
     );
-    const pdfBytes = buildImagePdf(jpegBytes, img.width, img.height);
+    const pdfBytes = buildImagePdf(jpegBytes, img.width, img.height, textItems, w);
 
     sendProgress({ status: "downloading", message: "Saving PDF…" });
     await download("data:application/pdf;base64," + uint8ToBase64(pdfBytes), filename);

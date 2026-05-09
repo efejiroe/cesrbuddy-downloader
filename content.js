@@ -93,10 +93,40 @@ function extractPageData() {
   return data;
 }
 
+/**
+ * Returns an array of positioned text items from all visible text nodes.
+ * Each item: { text, x, y, h, size } in CSS pixels, relative to the
+ * document origin (works correctly when the devtools viewport override
+ * has expanded the viewport to full page height, so scroll is zero).
+ */
+function extractTextLayer() {
+  const items = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  let node;
+  while ((node = walker.nextNode())) {
+    const text = node.textContent;
+    if (!text.trim()) continue;
+    const parent = node.parentElement;
+    if (!parent) continue;
+    const tag = parent.tagName.toLowerCase();
+    if (tag === "script" || tag === "style" || tag === "noscript") continue;
+    const cs = window.getComputedStyle(parent);
+    if (cs.display === "none" || cs.visibility === "hidden") continue;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const br = range.getBoundingClientRect();
+    if (br.width < 1 || br.height < 1) continue;
+    items.push({ text, x: br.left, y: br.top, h: br.height, size: parseFloat(cs.fontSize) || 10 });
+  }
+  return items;
+}
+
 // Listen for messages from the popup / background script
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "getPageData") {
     sendResponse(extractPageData());
+  } else if (message.action === "getTextLayer") {
+    sendResponse(extractTextLayer());
   }
   return false; // synchronous response is fine here
 });
