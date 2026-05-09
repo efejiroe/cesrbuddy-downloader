@@ -62,20 +62,40 @@ function download(url, filename) {
   });
 }
 
-function slugify(text) {
+// Mapping of entry type patterns to their standard abbreviations.
+// Patterns are tested in order; first match wins.
+const ENTRY_TYPE_ABBREVS = [
+  [/^Direct Observation of Procedural Skills/i,          ()  => "DOPS"],
+  [/^Case-based Discussion/i,                            ()  => "CbD"],
+  [/^Entrustable Professional Activity\s*(\d+)/i,        (m) => `EPA${m[1]}`],
+  [/^Clinical Rating Scale/i,                            ()  => "CRS"],
+  [/^Objective Structured Assessment of Technical Skills/i, () => "OSATS"],
+  [/^Mini Clinical Evaluation Exercise/i,                ()  => "Mini-CEX"],
+  [/^Multi.Source Feedback/i,                            ()  => "MSF"],
+];
+
+function abbreviateType(entryType) {
+  const t = (entryType ?? "").trim();
+  for (const [pattern, fn] of ENTRY_TYPE_ABBREVS) {
+    const m = t.match(pattern);
+    if (m) return fn(m);
+  }
+  // Fallback: strip characters that are invalid in filenames
+  return t.replace(/[\\/:*?"<>|]/g, "").trim() || "Entry";
+}
+
+// Keep spaces and hyphens so filenames read naturally.
+// Only strip characters that are invalid on Windows/macOS filesystems.
+function cleanTitle(text) {
   return (text ?? "")
     .trim()
-    .replace(/[^a-zA-Z0-9\s]/g, "")
-    .replace(/\s+/g, "_");
+    .replace(/[\\/:*?"<>|]/g, "")
+    .trim() || "Untitled";
 }
 
 function buildFilename(pageData, ext) {
-  const title = slugify(pageData.title)     || "Untitled";
-  const type  = slugify(pageData.entryType) || "Entry";
-  if (pageData.learningOutcomeCodes.length > 0) {
-    const codes = pageData.learningOutcomeCodes.join("_");
-    return `${codes}_${title}_${type}.${ext}`;
-  }
+  const title = cleanTitle(pageData.title);
+  const type  = abbreviateType(pageData.entryType);
   return `${title}_${type}.${ext}`;
 }
 
