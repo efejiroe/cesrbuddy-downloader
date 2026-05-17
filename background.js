@@ -93,10 +93,16 @@ function cleanTitle(text) {
     .trim() || "Untitled";
 }
 
+function cleanSubSpecialty(text) {
+  const s = (text ?? "").trim().replace(/[\\/:*?"<>|]/g, "").trim();
+  return s || "xxxx";
+}
+
 function buildFilename(pageData, ext) {
-  const title = cleanTitle(pageData.title);
-  const type  = abbreviateType(pageData.entryType);
-  return `${title}_${type}.${ext}`;
+  const type         = abbreviateType(pageData.entryType);
+  const subSpecialty = cleanSubSpecialty(pageData.subSpecialty);
+  const title        = cleanTitle(pageData.title);
+  return `${type}_${subSpecialty}_${title}.${ext}`;
 }
 
 async function ensureContentScript(tabId) {

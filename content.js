@@ -1,11 +1,12 @@
 /**
  * Extracts structured page data from a FourteenFish assessment page.
- * Returns: { title, entryType, learningOutcomeCodes }
+ * Returns: { title, entryType, subSpecialty, learningOutcomeCodes }
  */
 function extractPageData() {
   const data = {
     title: "",
     entryType: "",
+    subSpecialty: "",
     learningOutcomeCodes: [],
   };
 
@@ -53,6 +54,23 @@ function extractPageData() {
   if (!data.title && document.title) {
     // e.g. "Bilateral Optic Atrophy | FourteenFish"
     data.title = document.title.split("|")[0].trim();
+  }
+
+  // --- Sub-specialty ---
+  // FourteenFish may label this "Sub-specialty" or "Subspecialty".
+  const subSpecialtyLabels = new Set(["sub-specialty", "subspecialty"]);
+  for (const el of allElements) {
+    const text = el.childNodes.length === 1 &&
+      el.childNodes[0].nodeType === Node.TEXT_NODE
+      ? el.textContent.trim()
+      : "";
+
+    if (subSpecialtyLabels.has(text.toLowerCase())) {
+      const sibling = el.nextElementSibling;
+      if (sibling) { data.subSpecialty = sibling.textContent.trim(); break; }
+      const parentSibling = el.parentElement && el.parentElement.nextElementSibling;
+      if (parentSibling) { data.subSpecialty = parentSibling.textContent.trim(); break; }
+    }
   }
 
   // --- Learning Outcome codes ---
